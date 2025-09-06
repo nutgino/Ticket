@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
 import Navbar from "./components/navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Single-file Next.js page implementing a cinematic modern movie-ticket site
 // Tailwind CSS assumed installed and configured in the project
@@ -10,6 +11,7 @@ import Navbar from "./components/navbar";
 export default function HomePage() {
   const [movies, setMovies] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -90,7 +92,7 @@ export default function HomePage() {
                 <div className="h-12 bg-white/10 rounded-lg animate-pulse backdrop-blur-sm"></div>
                 <div className="h-12 bg-white/10 rounded-lg animate-pulse backdrop-blur-sm w-3/4"></div>
               </div>
-              
+
               {/* Description Skeleton */}
               <div className="space-y-2">
                 <div className="h-4 bg-white/5 rounded animate-pulse backdrop-blur-sm"></div>
@@ -121,14 +123,14 @@ export default function HomePage() {
             </div>
           </section>
           {/* Animated Loading Text */}
-              <div className="flex justify-center mt-12">
-                <p className="text-gray-300 text-sm tracking-widest relative">
-                  <span className="animate-pulse">Loading</span>
-                  <span className="dot-1">.</span>
-                  <span className="dot-2">.</span>
-                  <span className="dot-3">.</span>
-                </p>
-              </div>
+          <div className="flex justify-center mt-12">
+            <p className="text-gray-300 text-sm tracking-widest relative">
+              <span className="animate-pulse">Loading</span>
+              <span className="dot-1">.</span>
+              <span className="dot-2">.</span>
+              <span className="dot-3">.</span>
+            </p>
+          </div>
           {/* Movies Grid Skeleton */}
           <section>
             <div className="h-8 w-36 bg-white/10 rounded animate-pulse backdrop-blur-sm mb-4"></div>
@@ -220,7 +222,12 @@ export default function HomePage() {
       <main className="max-w-6xl mx-auto p-6">
         {/* Hero */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-8">
-          <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+            className="space-y-4"
+          >
             <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
               Experience movies the cinematic way
             </h2>
@@ -249,13 +256,18 @@ export default function HomePage() {
               <span className="px-3 py-1 bg-white/5 rounded">VIP</span>
               <span className="px-3 py-1 bg-white/5 rounded">3D</span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="hidden md:flex justify-center">
+          <motion.div
+            initial={{ opacity: 0, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="hidden md:flex justify-center"
+          >
             <div className="w-64 h-96 rounded-xl shadow-2xl transform hover:scale-105 transition overflow-hidden bg-gradient-to-b from-[#2196F3]/20 to-[#0D47A1]/30">
               {/* <img src={movies[0].poster} alt="featured" className="w-full h-full object-cover"/> */}
             </div>
-          </div>
+          </motion.div>
         </section>
 
         {/* Movies Grid */}
@@ -263,49 +275,231 @@ export default function HomePage() {
           <h3 className="text-2xl font-bold mb-4">Now Showing</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {movies.map((movie) => (
-              <article
-                key={movie.id}
-                className="bg-black/40 rounded-xl overflow-hidden hover:shadow-[0_10px_30px_rgba(33,150,243,0.12)] transition"
-              >
-                <div className="relative">
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="w-full h-72 object-cover"
-                  />
-                  <div className="absolute left-3 top-3 px-2 py-1 bg-black/60 rounded text-xs">
-                    {movie.rating}
+              <div key={movie.id}>
+                {/* Normal Card */}
+                <motion.article
+                  layoutId={`card-${movie.id}`}
+                  onClick={() => setSelected(movie)}
+                  className="group bg-gradient-to-br from-gray-900/50 to-black/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-[#2196F3]/30 hover:shadow-[0_20px_60px_rgba(33,150,243,0.15)] transition-all duration-500 cursor-pointer transform hover:scale-[1.02]"
+                  whileHover={{ y: -4 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <div className="relative overflow-hidden">
+                    <motion.img
+                    
+                      src={movie.poster}
+                      alt={movie.title}
+                      className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <motion.div
+                      className="absolute left-3 top-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-xs font-medium flex items-center gap-1"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <span className="text-[#2196F3]">★</span> {movie.rating}
+                    </motion.div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h4 className="font-semibold text-lg">{movie.title}</h4>
-                  <p className="text-sm text-gray-300 line-clamp-2">
-                    {movie.synopsis}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-sm text-gray-300">{movie.length}</div>
 
-                    {/* รอมาทำ */}
-                    <div className="flex gap-2">
-                      {movie.showtimes.slice(0, 3).map((st) => (
-                        <button
-                          key={st}
-                          onClick={() => openBooking(movie, st)}
-                          className="text-sm px-3 py-1 rounded bg-white/6 hover:bg-[#2196F3]/40"
-                        >
-                          {st}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => openBooking(movie)}
-                        className="ml-2 px-3 py-1 rounded bg-gradient-to-r from-[#2196F3] to-[#0D47A1] text-black font-semibold"
+                  <div className="p-5 space-y-3">
+                    <motion.h4
+                      className="font-bold text-xl bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {movie.title}
+                    </motion.h4>
+
+                    <motion.p
+                      className="text-sm text-gray-400 line-clamp-2 group-hover:text-gray-300 transition-colors duration-300"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      {movie.synopsis}
+                    </motion.p>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <motion.div
+                        className="text-sm text-gray-400 flex items-center gap-1"
+                        whileHover={{ scale: 1.05 }}
                       >
-                        Details
-                      </button>
+                        <span className="text-[#2196F3]/60">⏱</span>{" "}
+                        {movie.length}
+                      </motion.div>
+
+                      <div className="flex gap-2 items-center">
+                        {movie.showtimes.slice(0, 2).map((st, index) => (
+                          <motion.button
+                            key={st}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openBooking(movie, st);
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-[#2196F3]/20 hover:border-[#2196F3]/40 transition-all duration-300"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 + index * 0.1 }}
+                          >
+                            {st}
+                          </motion.button>
+                        ))}
+
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openBooking(movie);
+                          }}
+                          className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white text-sm font-semibold shadow-lg shadow-[#2196F3]/20 hover:shadow-[#2196F3]/40 transition-all duration-300"
+                          whileHover={{
+                            scale: 1.05,
+                            boxShadow: "0 10px 25px rgba(33,150,243,0.3)",
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          จอง
+                        </motion.button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
+                </motion.article>
+
+                {/* Fullscreen Modal */}
+                <AnimatePresence mode="wait">
+                  {selected && (
+                    <>
+                      {/* Background Blur with Smooth Fade */}
+                      <motion.div
+                        className="fixed inset-0 bg-gray/80 backdrop-blur-2xl z-40"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        onClick={() => setSelected(null)}
+                      />
+
+                      {/* Fullscreen Card with Spring Animation */}
+                      <motion.div
+                        layoutId={`card-${selected.id}`}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 25,
+                          duration: 0.4,
+                        }}
+                      >
+                        <motion.div
+                          className="bg-gradient-to-br from-gray-900 to-black rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-white/10"
+                          initial={{ y: 50 }}
+                          animate={{ y: 0 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                          }}
+                        >
+                          
+
+                          {/* Image with Ken Burns Effect */}
+                          <div onClick={() => setSelected(null)} className="relative h-96 md:h-[28rem] overflow-hidden">
+                            <motion.img
+                            
+                              src={selected.poster}
+                              alt={selected.title}
+                              className="w-full h-full object-cover"
+                              initial={{ scale: 1.1 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                          </div>
+
+                          {/* Content */}
+                          <motion.div
+                            className="p-8 text-white -mt-20 relative z-10"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.4 }}
+                          >
+                            <motion.h2
+                              className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.3 }}
+                            >
+                              {selected.title}
+                            </motion.h2>
+
+                            <motion.p
+                              className="text-gray-300 mb-6 text-base leading-relaxed"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.4 }}
+                            >
+                              {selected.synopsis}
+                            </motion.p>
+
+                            <motion.div
+                              className="flex items-center gap-4 mb-6 text-sm text-gray-400"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.5 }}
+                            >
+                              <span className="flex items-center gap-1">
+                                <span className="text-[#2196F3]">★</span>{" "}
+                                {selected.rating}
+                              </span>
+                              <span>•</span>
+                              <span>{selected.length}</span>
+                            </motion.div>
+
+                            <motion.div
+                              className="flex flex-wrap gap-3"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.6 }}
+                            >
+                              {selected.showtimes.map((st, index) => (
+                                <motion.button
+                                  key={st}
+                                  onClick={() => openBooking(selected, st)}
+                                  className="px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-[#2196F3]/30 hover:border-[#2196F3]/50 transition-all duration-300 font-medium"
+                                  whileHover={{ scale: 1.05, y: -2 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.7 + index * 0.05 }}
+                                >
+                                  {st}
+                                </motion.button>
+                              ))}
+
+                              <motion.button
+                                onClick={() => openBooking(selected)}
+                                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white font-bold shadow-lg shadow-[#2196F3]/30 hover:shadow-[#2196F3]/50 transition-all duration-300"
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                จองตั๋วทันที
+                              </motion.button>
+                            </motion.div>
+                          </motion.div>
+                        </motion.div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </div>
         </section>
